@@ -89,4 +89,43 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { btn.textContent = 'Resend code'; btn.disabled = false; }, 3000);
   });
 
+  // ─── STEP 3: Developer Password Bypass ───
+  document.getElementById('passwordForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('loginPassBtn');
+    const errEl = document.getElementById('passErr');
+    const email = document.getElementById('passEmailInput').value.trim();
+    const password = document.getElementById('passInput').value;
+    errEl.textContent = '';
+
+    btn.textContent = 'Logging in…'; btn.disabled = true;
+
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        errEl.textContent = error.message;
+        btn.textContent = 'Login →'; btn.disabled = false;
+      } else {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('subscription_status')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profile?.subscription_status === 'active' || profile?.subscription_status === 'pro') {
+          window.location.href = 'generator.html';
+        } else {
+          window.location.href = 'checkout.html';
+        }
+      }
+    } catch (err) {
+      errEl.textContent = 'Connection error.';
+      btn.textContent = 'Login →'; btn.disabled = false;
+    }
+  });
+
 });

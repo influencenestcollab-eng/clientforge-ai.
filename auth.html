@@ -54,9 +54,33 @@
         </form>
       </div>
 
+      <!-- STEP 3: Password Login (Developer Bypass) -->
+      <div id="stepPassword" style="display:none">
+        <div class="auth-header">
+          <h2>Developer Login</h2>
+          <p>Login with password to bypass email limits.</p>
+        </div>
+        <form class="auth-form" id="passwordForm">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="passEmailInput" placeholder="you@company.com"/>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="passInput" placeholder="••••••••"/>
+          </div>
+          <button type="submit" class="btn-primary btn-full auth-submit" id="loginPassBtn">Login →</button>
+          <div class="auth-err" id="passErr"></div>
+          <button type="button" class="resend-btn" onclick="location.reload()">Back to OTP</button>
+        </form>
+      </div>
+
     </div>
 
-    <p class="auth-footer-note">By continuing, you agree to our <a href="#">Terms</a> & <a href="#">Privacy Policy</a>.</p>
+    <p class="auth-footer-note">
+      By continuing, you agree to our <a href="#">Terms</a> & <a href="#">Privacy Policy</a>.
+      <br/><span style="cursor:pointer;opacity:0.3;font-size:0.7rem;" onclick="document.getElementById('stepEmail').style.display='none';document.getElementById('stepPassword').style.display='block'">Dev Mode</span>
+    </p>
   </div>
 
   <script src="supabase-config.js"></script>
