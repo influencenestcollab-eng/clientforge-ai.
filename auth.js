@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Attempting to send OTP to:', userEmail);
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabaseClient.auth.signInWithOtp({
         email: userEmail,
         options: { shouldCreateUser: true }
       });
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btn.textContent = 'Verifying…'; btn.disabled = true;
 
-    const { data, error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabaseClient.auth.verifyOtp({
       email: userEmail,
       token: otp,
       type: 'email'

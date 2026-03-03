@@ -6,11 +6,11 @@ const STARTER_LIMIT = 100;
 document.addEventListener('DOMContentLoaded', async () => {
 
   // ─── Auth Guard ───
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) { window.location.href = 'auth.html'; return; }
 
   // ─── Check subscription ───
-  const { data: profile } = await supabase
+  const { data: profile } = await supabaseClient
     .from('profiles')
     .select('subscription_status, subscription_plan, campaigns_used_this_month')
     .eq('id', session.user.id)
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ─── Logout ───
   document.getElementById('logoutBtn').addEventListener('click', async (e) => {
     e.preventDefault();
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     window.location.href = 'index.html';
   });
 

@@ -13,4 +13,4 @@ const PRICE_INR = 49900; // ₹499 in paise
 const PRICE_USD = 699;   // $6.99 in cents
 
 // Initialize Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

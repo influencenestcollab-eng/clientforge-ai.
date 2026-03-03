@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const statusEl = document.getElementById('paymentStatus');
     statusEl.textContent = '';
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     // If not logged in, redirect to auth
     if (!session) {
       window.location.href = 'auth.html';
