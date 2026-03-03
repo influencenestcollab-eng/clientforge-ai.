@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.textContent = 'Verify & Continue →'; btn.disabled = false;
     } else {
       // Check if user has active subscription
-      const { data: profile } = await supabase
+      const { data: profile } = await supabaseClient
         .from('profiles')
         .select('subscription_status')
         .eq('id', data.user.id)
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('resendBtn').addEventListener('click', async () => {
     const btn = document.getElementById('resendBtn');
     btn.textContent = 'Sending…'; btn.disabled = true;
-    await supabase.auth.signInWithOtp({ email: userEmail });
+    await supabaseClient.auth.signInWithOtp({ email: userEmail });
     setTimeout(() => { btn.textContent = 'Resend code'; btn.disabled = false; }, 3000);
   });
 
