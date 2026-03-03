@@ -129,8 +129,7 @@ async function callGenerateAPI(data, token) {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json', 
-      'Authorization': `Bearer ${token}`,
-      'apikey': SUPABASE_ANON_KEY
+      'Authorization': `Bearer ${token}`
     },
     body: JSON.stringify(data)
   });

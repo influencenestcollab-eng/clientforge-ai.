@@ -49,11 +49,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // DEBUG: Log token payload
     try {
-      const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+      const base64Url = session.access_token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
       console.log('JWT Payload:', payload);
-      // alert('Debug: Token Project Ref = ' + payload.ref); 
+      alert('🔒 JWT DEBUG\nToken Project: ' + payload.ref + '\nUser: ' + payload.email + '\n\nIf project is NOT feytuhtffaxezjvtdmxd, that is the issue!');
     } catch (e) {
       console.error('Failed to decode token:', e);
+      alert('Error decoding token. See console.');
     }
 
     const planBtn = document.getElementById(plan + 'PayBtn');
@@ -65,8 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': SUPABASE_ANON_KEY
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({ currency, plan })
       });
@@ -96,8 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session.access_token}`,
-              'apikey': SUPABASE_ANON_KEY
+              'Authorization': `Bearer ${session.access_token}`
             },
             body: JSON.stringify({
               razorpay_payment_id: response.razorpay_payment_id,

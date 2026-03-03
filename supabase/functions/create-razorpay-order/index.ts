@@ -28,13 +28,38 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get('Authorization') || '';
+    const token = authHeader.replace('Bearer ', '').trim();
+    
+    // SERVER SIDE DECODE (for debugging only)
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      console.log('SERVER DEBUG: JWT Payload ISS:', payload.iss);
+      console.log('SERVER DEBUG: JWT Payload SUB:', payload.sub);
+    } catch (e) {
+      console.error('SERVER DEBUG: Failed to decode JWT:', e.message);
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { global: { headers: { Authorization: authHeader } } }
     );
-    const { data: { user }, error } = await supabaseClient.auth.getUser();
-    if (error || !user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
+
+    // Try verifying the user
+    const { data: { user }, error } = await supabaseClient.auth.getUser(token);
+    
+    if (error || !user) {
+      console.error('JWT Verification Failed:', error?.message);
+      return new Response(JSON.stringify({ 
+        error: 'Unauthorized', 
+        details: error?.message || 'Invalid session',
+        debug: {
+          token_start: token.substring(0, 10),
+          env_url: Deno.env.get('SUPABASE_URL')?.substring(0, 25)
+        }
+      }), { status: 401, headers: corsHeaders });
+    }
+    console.log('Verification Success for User:', user.id);
 
     const { currency = 'inr', plan = 'starter' } = await req.json();
 
