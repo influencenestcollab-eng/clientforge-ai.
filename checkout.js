@@ -42,8 +42,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     // If no session or error, redirect to login
     if (sessionErr || !session) {
       console.error('Session error or missing:', sessionErr);
-      window.location.href = 'auth.html?error=session_expired';
+      alert('Your session has expired. Please log in again.');
+      window.location.href = 'auth.html';
       return;
+    }
+
+    // DEBUG: Log token payload
+    try {
+      const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+      console.log('JWT Payload:', payload);
+      // alert('Debug: Token Project Ref = ' + payload.ref); 
+    } catch (e) {
+      console.error('Failed to decode token:', e);
     }
 
     const planBtn = document.getElementById(plan + 'PayBtn');
@@ -61,7 +71,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         body: JSON.stringify({ currency, plan })
       });
 
-      if (!orderRes.ok) throw new Error('Could not create payment order.');
+      if (!orderRes.ok) {
+        const errData = await orderRes.json().catch(() => ({}));
+        console.error('Order creation failed:', errData);
+        alert('Server Error: ' + (errData.details || errData.error || 'Check console'));
+        throw new Error(errData.details || 'Could not create payment order.');
+      }
       const order = await orderRes.json();
 
       const rzp = new Razorpay({
