@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('stepEmail').style.display = 'none';
         document.getElementById('stepOtp').style.display = 'block';
         document.getElementById('otpSentTo').textContent =
-          `We sent a 6-digit code to ${userEmail}`;
+          `We sent a code to ${userEmail}`;
         document.getElementById('otpInput').focus();
       }
     } catch (err) {
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const otp = document.getElementById('otpInput').value.trim();
     errEl.textContent = '';
 
-    if (!/^\d{6}$/.test(otp)) {
-      errEl.textContent = 'Please enter the 6-digit code from your email.';
+    if (!/^\d{6,8}$/.test(otp)) {
+      errEl.textContent = 'Please enter the valid code from your email (6-8 digits).';
       return;
     }
 

@@ -46,7 +46,7 @@
         <form class="auth-form" id="otpForm">
           <div class="form-group">
             <label>One-Time Code</label>
-            <input type="text" id="otpInput" placeholder="123456" maxlength="6" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" required/>
+            <input type="text" id="otpInput" placeholder="123456" maxlength="8" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" required/>
           </div>
           <button type="submit" class="btn-primary btn-full auth-submit" id="verifyOtpBtn">Verify & Continue →</button>
           <div class="auth-err" id="otpErr"></div>
