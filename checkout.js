@@ -37,10 +37,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const statusEl = document.getElementById('paymentStatus');
     statusEl.textContent = '';
 
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    // If not logged in, redirect to auth
-    if (!session) {
-      window.location.href = 'auth.html';
+    const { data: { session }, error: sessionErr } = await supabaseClient.auth.getSession();
+    
+    // If no session or error, redirect to login
+    if (sessionErr || !session) {
+      console.error('Session error or missing:', sessionErr);
+      window.location.href = 'auth.html?error=session_expired';
       return;
     }
 

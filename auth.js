@@ -1,131 +1,95 @@
-// auth.js — Email OTP Login (no password, no Google)
+// auth.js — Email/Password Authentication (v4)
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  let userEmail = '';
+  let isLogin = true;
 
-  // ─── STEP 1: Send OTP ───
-  document.getElementById('emailForm').addEventListener('submit', async (e) => {
+  const authForm = document.getElementById('authForm');
+  const authTitle = document.getElementById('authTitle');
+  const authSubtitle = document.getElementById('authSubtitle');
+  const authSubmitBtn = document.getElementById('authSubmitBtn');
+  const authErr = document.getElementById('authErr');
+  const toggleAuthMode = document.getElementById('toggleAuthMode');
+  const toggleText = document.getElementById('toggleText');
+
+  // ─── Toggle between Login and Signup ───
+  toggleAuthMode.addEventListener('click', (e) => {
     e.preventDefault();
-    const btn = document.getElementById('sendOtpBtn');
-    const errEl = document.getElementById('emailErr');
-    errEl.textContent = '';
-    userEmail = document.getElementById('emailInput').value.trim();
-
-    btn.textContent = 'Sending…'; btn.disabled = true;
-    console.log('Attempting to send OTP to:', userEmail);
-
-    try {
-      const { error } = await supabaseClient.auth.signInWithOtp({
-        email: userEmail,
-        options: { shouldCreateUser: true }
-      });
-
-      console.log('Supabase response received:', { error });
-
-      if (error) {
-        errEl.textContent = error.message;
-        btn.textContent = 'Send Code →'; btn.disabled = false;
-      } else {
-        // Show OTP step
-        document.getElementById('stepEmail').style.display = 'none';
-        document.getElementById('stepOtp').style.display = 'block';
-        document.getElementById('otpSentTo').textContent =
-          `We sent a code to ${userEmail}`;
-        document.getElementById('otpInput').focus();
-      }
-    } catch (err) {
-      console.error('Unexpected error during signInWithOtp:', err);
-      errEl.textContent = 'Connection error. Please check your internet and try again.';
-      btn.textContent = 'Send Code →'; btn.disabled = false;
-    }
-  });
-
-  // ─── STEP 2: Verify OTP ───
-  document.getElementById('otpForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('verifyOtpBtn');
-    const errEl = document.getElementById('otpErr');
-    const otp = document.getElementById('otpInput').value.trim();
-    errEl.textContent = '';
-
-    if (!/^\d{6,8}$/.test(otp)) {
-      errEl.textContent = 'Please enter the valid code from your email (6-8 digits).';
-      return;
-    }
-
-    btn.textContent = 'Verifying…'; btn.disabled = true;
-
-    const { data, error } = await supabaseClient.auth.verifyOtp({
-      email: userEmail,
-      token: otp,
-      type: 'email'
-    });
-
-    if (error) {
-      errEl.textContent = 'Invalid or expired code. Please try again.';
-      btn.textContent = 'Verify & Continue →'; btn.disabled = false;
+    isLogin = !isLogin;
+    
+    if (isLogin) {
+      authTitle.textContent = 'Sign In';
+      authSubtitle.textContent = 'Enter your credentials to access your account.';
+      authSubmitBtn.textContent = 'Sign In →';
+      toggleText.innerHTML = `Don't have an account? <a href="#" id="toggleAuthMode">Create one</a>`;
     } else {
-      // Check if user has active subscription
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('subscription_status')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profile?.subscription_status === 'active' || profile?.subscription_status === 'pro') {
-        window.location.href = 'generator.html';
-      } else {
-        window.location.href = 'checkout.html';
-      }
+      authTitle.textContent = 'Create Account';
+      authSubtitle.textContent = 'Start your journey with ClientForge AI today.';
+      authSubmitBtn.textContent = 'Create Account →';
+      toggleText.innerHTML = `Already have an account? <a href="#" id="toggleAuthMode">Sign in</a>`;
     }
+    
+    // Re-attach event listener to the new link
+    document.getElementById('toggleAuthMode').addEventListener('click', arguments.callee);
   });
 
-  // ─── Resend OTP ───
-  document.getElementById('resendBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('resendBtn');
-    btn.textContent = 'Sending…'; btn.disabled = true;
-    await supabaseClient.auth.signInWithOtp({ email: userEmail });
-    setTimeout(() => { btn.textContent = 'Resend code'; btn.disabled = false; }, 3000);
-  });
-
-  // ─── STEP 3: Developer Password Bypass ───
-  document.getElementById('passwordForm')?.addEventListener('submit', async (e) => {
+  // ─── Handle Form Submission ───
+  authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const btn = document.getElementById('loginPassBtn');
-    const errEl = document.getElementById('passErr');
-    const email = document.getElementById('passEmailInput').value.trim();
-    const password = document.getElementById('passInput').value;
-    errEl.textContent = '';
-
-    btn.textContent = 'Logging in…'; btn.disabled = true;
+    const email = document.getElementById('emailInput').value.trim();
+    const password = document.getElementById('passwordInput').value;
+    
+    authErr.textContent = '';
+    authSubmitBtn.textContent = isLogin ? 'Signing in...' : 'Creating account...';
+    authSubmitBtn.disabled = true;
 
     try {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
-
-      if (error) {
-        errEl.textContent = error.message;
-        btn.textContent = 'Login →'; btn.disabled = false;
+      if (isLogin) {
+        // LOGIN
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+        if (error) throw error;
+        await handleAuthSuccess(data.user);
       } else {
-        const { data: profile } = await supabaseClient
-          .from('profiles')
-          .select('subscription_status')
-          .eq('id', data.user.id)
-          .single();
-
-        if (profile?.subscription_status === 'active' || profile?.subscription_status === 'pro') {
-          window.location.href = 'generator.html';
+        // SIGNUP
+        const { data, error } = await supabaseClient.auth.signUp({
+          email: email,
+          password: password,
+        });
+        if (error) throw error;
+        
+        // If email confirmation is ON, notify user. Otherwise, log them in.
+        if (data.session) {
+          await handleAuthSuccess(data.user);
         } else {
-          window.location.href = 'checkout.html';
+          authErr.style.color = '#00c37f';
+          authErr.textContent = 'Account created! Please check your email to confirm your signup.';
+          authSubmitBtn.textContent = 'Account Created ✅';
         }
       }
     } catch (err) {
-      errEl.textContent = 'Connection error.';
-      btn.textContent = 'Login →'; btn.disabled = false;
+      authErr.style.color = '#ff6b6b';
+      authErr.textContent = err.message;
+      authSubmitBtn.textContent = isLogin ? 'Sign In →' : 'Create Account →';
+      authSubmitBtn.disabled = false;
     }
   });
+
+  async function handleAuthSuccess(user) {
+    // Check if user has active subscription
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('subscription_status')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.subscription_status === 'active' || profile?.subscription_status === 'pro') {
+      window.location.href = 'generator.html';
+    } else {
+      window.location.href = 'checkout.html';
+    }
+  }
 
 });

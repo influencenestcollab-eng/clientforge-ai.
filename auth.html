@@ -21,66 +21,35 @@
 
     <div class="auth-card glass-panel">
 
-      <!-- STEP 1: Enter email -->
-      <div id="stepEmail">
+      <!-- Combined Login/Signup Form -->
+      <div id="authContent">
         <div class="auth-header">
-          <h2>Welcome</h2>
-          <p>Enter your email. We'll send you a one-time code to sign in.</p>
+          <h2 id="authTitle">Sign In</h2>
+          <p id="authSubtitle">Enter your credentials to access your account.</p>
         </div>
-        <form class="auth-form" id="emailForm">
+
+        <form class="auth-form" id="authForm">
           <div class="form-group">
             <label>Email Address</label>
             <input type="email" id="emailInput" placeholder="you@company.com" autocomplete="email" required/>
           </div>
-          <button type="submit" class="btn-primary btn-full auth-submit" id="sendOtpBtn">Send Code →</button>
-          <div class="auth-err" id="emailErr"></div>
-        </form>
-      </div>
-
-      <!-- STEP 2: Enter OTP -->
-      <div id="stepOtp" style="display:none">
-        <div class="auth-header">
-          <h2>Check your inbox</h2>
-          <p id="otpSentTo">We sent a 6-digit code to your email.</p>
-        </div>
-        <form class="auth-form" id="otpForm">
-          <div class="form-group">
-            <label>One-Time Code</label>
-            <input type="text" id="otpInput" placeholder="123456" maxlength="8" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" required/>
-          </div>
-          <button type="submit" class="btn-primary btn-full auth-submit" id="verifyOtpBtn">Verify & Continue →</button>
-          <div class="auth-err" id="otpErr"></div>
-          <button type="button" class="resend-btn" id="resendBtn">Didn't get it? Resend code</button>
-        </form>
-      </div>
-
-      <!-- STEP 3: Password Login (Developer Bypass) -->
-      <div id="stepPassword" style="display:none">
-        <div class="auth-header">
-          <h2>Developer Login</h2>
-          <p>Login with password to bypass email limits.</p>
-        </div>
-        <form class="auth-form" id="passwordForm">
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="passEmailInput" placeholder="you@company.com"/>
-          </div>
           <div class="form-group">
             <label>Password</label>
-            <input type="password" id="passInput" placeholder="••••••••"/>
+            <input type="password" id="passwordInput" placeholder="••••••••" required/>
           </div>
-          <button type="submit" class="btn-primary btn-full auth-submit" id="loginPassBtn">Login →</button>
-          <div class="auth-err" id="passErr"></div>
-          <button type="button" class="resend-btn" onclick="location.reload()">Back to OTP</button>
+          
+          <button type="submit" class="btn-primary btn-full auth-submit" id="authSubmitBtn">Sign In →</button>
+          <div class="auth-err" id="authErr"></div>
         </form>
+
+        <div class="auth-toggle">
+          <p id="toggleText">Don't have an account? <a href="#" id="toggleAuthMode">Create one</a></p>
+        </div>
       </div>
 
     </div>
 
-    <p class="auth-footer-note">
-      By continuing, you agree to our <a href="#">Terms</a> & <a href="#">Privacy Policy</a>.
-      <br/><span style="cursor:pointer;opacity:0.3;font-size:0.7rem;" onclick="document.getElementById('stepEmail').style.display='none';document.getElementById('stepPassword').style.display='block'">Dev Mode</span>
-    </p>
+    <p class="auth-footer-note">By continuing, you agree to our <a href="#">Terms</a> & <a href="#">Privacy Policy</a>.</p>
   </div>
 
   <script src="supabase-config.js"></script>
