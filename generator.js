@@ -127,7 +127,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function callGenerateAPI(data, token) {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-outreach`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    headers: { 
+      'Content-Type': 'application/json', 
+      'Authorization': `Bearer ${token}`,
+      'apikey': SUPABASE_ANON_KEY
+    },
     body: JSON.stringify(data)
   });
   return await res.json();

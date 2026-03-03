@@ -55,7 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': SUPABASE_ANON_KEY
         },
         body: JSON.stringify({ currency, plan })
       });
@@ -80,7 +81,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session.access_token}`
+              'Authorization': `Bearer ${session.access_token}`,
+              'apikey': SUPABASE_ANON_KEY
             },
             body: JSON.stringify({
               razorpay_payment_id: response.razorpay_payment_id,
