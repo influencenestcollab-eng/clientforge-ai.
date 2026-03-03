@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subscribe — ClientForge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="checkout.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+  <div class="checkout-bg">
+    <div class="checkout-orb checkout-orb-1"></div>
+    <div class="checkout-orb checkout-orb-2"></div>
+  </div>
+
+  <nav class="checkout-nav">
+    <a href="index.html" class="logo">CLIENT<span class="grade-text">FORGE</span> AI</a>
+    <a href="index.html" class="btn-ghost">← Back</a>
+  </nav>
+
+  <div class="checkout-page-wrap">
+    <div class="checkout-header">
+      <h1>Choose Your <span class="grade-text">Plan</span></h1>
+      <p>No hidden fees. Cancel anytime.</p>
+      <!-- Currency toggle -->
+      <div class="currency-toggle-bar">
+        <button class="cur-btn active" id="inrBtn">🇮🇳 India (₹)</button>
+        <button class="cur-btn" id="usdBtn">🌍 Global ($)</button>
+      </div>
+    </div>
+
+    <!-- Plan Cards -->
+    <div class="plan-cards-row">
+
+      <!-- STARTER PLAN -->
+      <div class="plan-card glass-panel" id="starterCard">
+        <div class="plan-tag">Starter</div>
+        <div class="plan-price-wrap">
+          <div class="plan-price" id="starterPrice">₹499<span>/mo</span></div>
+        </div>
+        <div class="plan-limit-badge">100 campaigns/month</div>
+        <ul class="plan-perks">
+          <li>✅ 3 Cold Emails per campaign</li>
+          <li>✅ 3 DM Scripts per campaign</li>
+          <li>✅ 4 Follow-Ups per campaign</li>
+          <li>✅ Up to 100 campaigns/month</li>
+          <li>✅ Campaign history saved</li>
+          <li>✅ Niche & tone customisation</li>
+        </ul>
+        <button class="btn-primary btn-full plan-pay-btn" data-plan="starter" id="starterPayBtn">
+          Get Starter Plan
+        </button>
+      </div>
+
+      <!-- PRO PLAN -->
+      <div class="plan-card glass-panel plan-card-pro" id="proCard">
+        <div class="plan-popular-badge">Most Popular</div>
+        <div class="plan-tag">Pro</div>
+        <div class="plan-price-wrap">
+          <div class="plan-price" id="proPrice">₹999<span>/mo</span></div>
+        </div>
+        <div class="plan-limit-badge plan-limit-unlimited">Unlimited campaigns</div>
+        <ul class="plan-perks">
+          <li>✅ Everything in Starter</li>
+          <li>🚀 Unlimited campaigns/month</li>
+          <li>🚀 Priority AI generation</li>
+          <li>🚀 Early access to new features</li>
+          <li>🚀 Email support</li>
+        </ul>
+        <button class="btn-primary btn-full plan-pay-btn" data-plan="pro" id="proPayBtn">
+          Get Pro Plan
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Payment status -->
+    <div class="payment-status-bar" id="paymentStatus"></div>
+
+    <!-- Guarantee strip -->
+    <div class="guarantee-strip">
+      🔒 Secure payment via Razorpay &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; Cards, UPI, Net Banking accepted
+    </div>
+
+    <p class="checkout-login">Already subscribed? <a href="auth.html">Log in →</a></p>
+  </div>
+
+  <script src="supabase-config.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>

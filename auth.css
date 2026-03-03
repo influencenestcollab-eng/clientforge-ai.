@@ -1,0 +1,59 @@
+/* AUTH PAGE */
+body { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.auth-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.auth-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(90px);
+}
+.auth-orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(112,0,255,0.2), transparent 70%);
+  top: -150px; left: -150px;
+}
+.auth-orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,212,255,0.15), transparent 70%);
+  bottom: -100px; right: -100px;
+}
+.auth-wrapper {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 420px;
+  padding: 2rem;
+  display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+}
+.auth-logo { font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; text-decoration: none; color: white; }
+.auth-card { width: 100%; padding: 2.5rem; }
+.auth-header { margin-bottom: 2rem; }
+.auth-header h2 { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.auth-header p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+.auth-form { display: flex; flex-direction: column; gap: 1.2rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-group label { font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.7); }
+.form-group input {
+  padding: 0.9rem 1.2rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px; color: white;
+  font-size: 1rem; font-family: inherit;
+  transition: border-color 0.2s; outline: none;
+  letter-spacing: 0.05em;
+}
+.form-group input:focus { border-color: var(--accent-blue); }
+.form-group input::placeholder { color: rgba(255,255,255,0.2); }
+#otpInput {
+  font-size: 1.8rem;
+  letter-spacing: 0.8rem;
+  text-align: center;
+  font-weight: 700;
+}
+.auth-submit { margin-top: 0.3rem; border-radius: 12px; padding: 1rem; }
+.auth-err { color: #ff6b6b; font-size: 0.85rem; min-height: 1.2em; text-align: center; }
+.resend-btn {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 0.85rem; cursor: pointer; font-family: inherit;
+  text-decoration: underline; text-underline-offset: 3px;
+  padding: 0; transition: color 0.2s;
+}
+.resend-btn:hover { color: white; }
+.auth-footer-note { font-size: 0.78rem; color: var(--text-muted); text-align: center; }
+.auth-footer-note a { color: var(--accent-blue); text-decoration: none; }

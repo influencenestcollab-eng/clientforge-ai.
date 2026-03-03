@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Generate Outreach — ClientForge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="generator.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="generator-nav">
+    <a href="index.html" class="logo">CLIENT<span class="grade-text">FORGE</span> AI</a>
+    <div class="gen-nav-right">
+      <span class="subscription-badge" id="subBadge">PRO</span>
+      <a href="#" class="btn-ghost" id="logoutBtn">Log Out</a>
+    </div>
+  </nav>
+
+  <!-- MAIN LAYOUT -->
+  <div class="generator-layout">
+
+    <!-- FORM PANEL -->
+    <aside class="form-panel glass-panel">
+      <h2>New Campaign</h2>
+      <p class="form-panel-sub">Fill in the details and let AI do the writing.</p>
+
+      <form id="outreachForm">
+
+        <div class="form-section">
+          <div class="form-section-title">About You</div>
+          <div class="form-group">
+            <label for="yourName">Your Name</label>
+            <input type="text" id="yourName" placeholder="Alex Johnson" required/>
+          </div>
+          <div class="form-group">
+            <label for="yourCompany">Your Company <span class="optional">optional</span></label>
+            <input type="text" id="yourCompany" placeholder="GrowthLab Agency"/>
+          </div>
+          <div class="form-group">
+            <label for="niche">Your Niche / Industry</label>
+            <input type="text" id="niche" placeholder="e.g. SaaS, E-commerce, Real Estate" required/>
+          </div>
+          <div class="form-group">
+            <label for="websiteUrl">Your Website <span class="optional">optional</span></label>
+            <input type="url" id="websiteUrl" placeholder="https://yourbusiness.com"/>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">About the Offer</div>
+          <div class="form-group">
+            <label for="offerDesc">What you offer / your main pitch</label>
+            <textarea id="offerDesc" rows="3" placeholder="I help e-commerce brands reduce Cart abandonment using AI retargeting — typically 20–40% revenue uplift." required></textarea>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">About the Prospect</div>
+          <div class="form-group">
+            <label for="receiverName">Receiver Name / Company</label>
+            <input type="text" id="receiverName" placeholder="John Smith or Acme Corp" required/>
+          </div>
+          <div class="form-group">
+            <label for="channel">Primary Channel</label>
+            <select id="channel">
+              <option value="email">Email</option>
+              <option value="linkedin">LinkedIn DM</option>
+              <option value="instagram">Instagram DM</option>
+              <option value="twitter">Twitter/X DM</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="prospectDesc">Brief description of the prospect</label>
+            <textarea id="prospectDesc" rows="2" placeholder="Growing e-com agency, 15 employees, recently started running paid ads."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="tone">Tone</label>
+            <select id="tone">
+              <option value="professional">Professional</option>
+              <option value="casual">Casual & Friendly</option>
+              <option value="bold">Bold & Direct</option>
+              <option value="curious">Curiosity-Driven</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full gen-submit" id="generateBtn">
+          <span id="btnLabel">✨ Generate Outreach</span>
+          <span id="btnSpinner" class="spinner" style="display:none"></span>
+        </button>
+      </form>
+    </aside>
+
+    <!-- OUTPUT PANEL -->
+    <main class="output-panel" id="outputPanel">
+
+      <!-- Empty state -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">✨</div>
+        <h3>Your AI outreach will appear here</h3>
+        <p>Fill in the form and click "Generate Outreach" to create your full outreach campaign.</p>
+      </div>
+
+      <!-- Results (hidden until generated) -->
+      <div class="results" id="results" style="display:none">
+
+        <div class="results-header">
+          <h2>Your Outreach Campaign</h2>
+          <button class="btn-ghost btn-sm" id="copyAllBtn">📋 Copy All</button>
+        </div>
+
+        <!-- Output Tabs -->
+        <div class="output-tabs">
+          <button class="output-tab active" data-tab="emails">📧 Emails (3)</button>
+          <button class="output-tab" data-tab="dms">💬 DMs (3)</button>
+          <button class="output-tab" data-tab="followups">🔁 Follow-Ups (4)</button>
+        </div>
+
+        <div class="output-content" id="emailsTab">
+          <div class="output-item" id="email1">
+            <div class="output-item-header">
+              <span class="output-label">Email 1 — Curiosity Hook</span>
+              <button class="copy-btn" data-target="email1">Copy</button>
+            </div>
+            <div class="output-body" id="email1-body"></div>
+          </div>
+          <div class="output-item" id="email2">
+            <div class="output-item-header">
+              <span class="output-label">Email 2 — Authority & Result</span>
+              <button class="copy-btn" data-target="email2">Copy</button>
+            </div>
+            <div class="output-body" id="email2-body"></div>
+          </div>
+          <div class="output-item" id="email3">
+            <div class="output-item-header">
+              <span class="output-label">Email 3 — Direct ROI</span>
+              <button class="copy-btn" data-target="email3">Copy</button>
+            </div>
+            <div class="output-body" id="email3-body"></div>
+          </div>
+        </div>
+
+        <div class="output-content" id="dmsTab" style="display:none">
+          <div class="output-item" id="dm1">
+            <div class="output-item-header">
+              <span class="output-label">DM 1 — Opener</span>
+              <button class="copy-btn" data-target="dm1">Copy</button>
+            </div>
+            <div class="output-body" id="dm1-body"></div>
+          </div>
+          <div class="output-item" id="dm2">
+            <div class="output-item-header">
+              <span class="output-label">DM 2 — Value First</span>
+              <button class="copy-btn" data-target="dm2">Copy</button>
+            </div>
+            <div class="output-body" id="dm2-body"></div>
+          </div>
+          <div class="output-item" id="dm3">
+            <div class="output-item-header">
+              <span class="output-label">DM 3 — CTA Focused</span>
+              <button class="copy-btn" data-target="dm3">Copy</button>
+            </div>
+            <div class="output-body" id="dm3-body"></div>
+          </div>
+        </div>
+
+        <div class="output-content" id="followupsTab" style="display:none">
+          <div class="output-item" id="fu1">
+            <div class="output-item-header">
+              <span class="output-label">Follow-Up 1 — Day 3</span>
+              <button class="copy-btn" data-target="fu1">Copy</button>
+            </div>
+            <div class="output-body" id="fu1-body"></div>
+          </div>
+          <div class="output-item" id="fu2">
+            <div class="output-item-header">
+              <span class="output-label">Follow-Up 2 — Day 7</span>
+              <button class="copy-btn" data-target="fu2">Copy</button>
+            </div>
+            <div class="output-body" id="fu2-body"></div>
+          </div>
+          <div class="output-item" id="fu3">
+            <div class="output-item-header">
+              <span class="output-label">Follow-Up 3 — Day 14</span>
+              <button class="copy-btn" data-target="fu3">Copy</button>
+            </div>
+            <div class="output-body" id="fu3-body"></div>
+          </div>
+          <div class="output-item" id="fu4">
+            <div class="output-item-header">
+              <span class="output-label">Follow-Up 4 — Break-Up</span>
+              <button class="copy-btn" data-target="fu4">Copy</button>
+            </div>
+            <div class="output-body" id="fu4-body"></div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Paywall overlay for non-subscribed users -->
+  <div class="paywall-overlay" id="paywallOverlay" style="display:none">
+    <div class="paywall-card glass-panel">
+      <div class="paywall-icon">🔒</div>
+      <h2>Unlock Full Access</h2>
+      <p>Subscribe to generate unlimited outreach campaigns.</p>
+      <div class="paywall-price">
+        <div class="price-opt">₹499<span>/mo</span> <small>India</small></div>
+        <div class="price-sep">or</div>
+        <div class="price-opt">$6.99<span>/mo</span> <small>Global</small></div>
+      </div>
+      <a href="checkout.html" class="btn-primary btn-full">Subscribe Now</a>
+      <a href="index.html" class="paywall-back">← Back to Home</a>
+    </div>
+  </div>
+
+  <script src="supabase-config.js"></script>
+  <script src="generator.js"></script>
+</body>
+</html>

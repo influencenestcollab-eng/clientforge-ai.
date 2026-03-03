@@ -1,0 +1,12 @@
+# Supabase local dev files
+.supabase/
+
+# Node
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
