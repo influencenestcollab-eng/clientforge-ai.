@@ -13,22 +13,31 @@ document.addEventListener('DOMContentLoaded', () => {
     userEmail = document.getElementById('emailInput').value.trim();
 
     btn.textContent = 'Sending…'; btn.disabled = true;
+    console.log('Attempting to send OTP to:', userEmail);
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email: userEmail,
-      options: { shouldCreateUser: true }
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: userEmail,
+        options: { shouldCreateUser: true }
+      });
 
-    if (error) {
-      errEl.textContent = error.message;
+      console.log('Supabase response received:', { error });
+
+      if (error) {
+        errEl.textContent = error.message;
+        btn.textContent = 'Send Code →'; btn.disabled = false;
+      } else {
+        // Show OTP step
+        document.getElementById('stepEmail').style.display = 'none';
+        document.getElementById('stepOtp').style.display = 'block';
+        document.getElementById('otpSentTo').textContent =
+          `We sent a 6-digit code to ${userEmail}`;
+        document.getElementById('otpInput').focus();
+      }
+    } catch (err) {
+      console.error('Unexpected error during signInWithOtp:', err);
+      errEl.textContent = 'Connection error. Please check your internet and try again.';
       btn.textContent = 'Send Code →'; btn.disabled = false;
-    } else {
-      // Show OTP step
-      document.getElementById('stepEmail').style.display = 'none';
-      document.getElementById('stepOtp').style.display = 'block';
-      document.getElementById('otpSentTo').textContent =
-        `We sent a 6-digit code to ${userEmail}`;
-      document.getElementById('otpInput').focus();
     }
   });
 
