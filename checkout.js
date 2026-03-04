@@ -47,16 +47,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // DEBUG: Log token payload
+    // DEBUG: Log token payload and time
     try {
       const base64Url = session.access_token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const payload = JSON.parse(atob(base64));
+      const now = Math.floor(Date.now() / 1000);
+      console.log('Browser Epoch:', now);
+      console.log('JWT iat:', payload.iat);
+      console.log('Time Diff (sec):', payload.iat - now);
+      
       console.log('JWT Payload:', payload);
-      alert('🔒 JWT DEBUG\nToken Project: ' + payload.ref + '\nUser: ' + payload.email + '\n\nIf project is NOT feytuhtffaxezjvtdmxd, that is the issue!');
     } catch (e) {
       console.error('Failed to decode token:', e);
-      alert('Error decoding token. See console.');
     }
 
     const planBtn = document.getElementById(plan + 'PayBtn');
@@ -64,11 +67,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     planBtn.textContent = 'Creating order…'; planBtn.disabled = true;
 
     try {
+      console.log('Initiating payment for', plan, 'with token start:', session.access_token.substring(0, 15));
+      
       const orderRes = await fetch(`${SUPABASE_URL}/functions/v1/create-razorpay-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'X-Supabase-Auth': session.access_token
         },
         body: JSON.stringify({ currency, plan })
       });
@@ -94,11 +100,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           statusEl.style.color = '#00c37f';
           statusEl.textContent = '✅ Payment successful! Activating your plan…';
 
-          await fetch(`${SUPABASE_URL}/functions/v1/razorpay-webhook`, {
+          const verifyRes = await fetch(`${SUPABASE_URL}/functions/v1/razorpay-webhook`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session.access_token}`
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'X-Supabase-Auth': session.access_token
             },
             body: JSON.stringify({
               razorpay_payment_id: response.razorpay_payment_id,

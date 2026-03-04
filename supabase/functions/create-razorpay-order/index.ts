@@ -20,51 +20,77 @@ const PRICES: Record<string, Record<string, { amount: number; currency: string }
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-auth',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 };
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get('Authorization') || '';
-    const token = authHeader.replace('Bearer ', '').trim();
-    
-    // SERVER SIDE DECODE (for debugging only)
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-      console.log('SERVER DEBUG: JWT Payload ISS:', payload.iss);
-      console.log('SERVER DEBUG: JWT Payload SUB:', payload.sub);
-    } catch (e) {
-      console.error('SERVER DEBUG: Failed to decode JWT:', e.message);
+    // 1. Check for User Token
+    const token = req.headers.get('X-Supabase-Auth')?.trim();
+    if (!token) {
+      console.error('ERROR: No X-Supabase-Auth header');
+      return new Response(JSON.stringify({ error: 'Missing token', details: 'No X-Supabase-Auth header found' }), { 
+        status: 401, 
+        headers: corsHeaders 
+      });
     }
 
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    // 2. Initialize Supabase Admin
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    // Try verifying the user
-    const { data: { user }, error } = await supabaseClient.auth.getUser(token);
-    
-    if (error || !user) {
-      console.error('JWT Verification Failed:', error?.message);
+    if (!supabaseUrl || !serviceRole) {
+      console.error('ERROR: Missing Supabase Environment Variables');
       return new Response(JSON.stringify({ 
-        error: 'Unauthorized', 
-        details: error?.message || 'Invalid session',
-        debug: {
-          token_start: token.substring(0, 10),
-          env_url: Deno.env.get('SUPABASE_URL')?.substring(0, 25)
-        }
-      }), { status: 401, headers: corsHeaders });
+        error: 'System Configuration Error', 
+        details: 'Server is missing SUPABASE_SERVICE_ROLE_KEY secret.' 
+      }), { status: 500, headers: corsHeaders });
     }
-    console.log('Verification Success for User:', user.id);
 
-    const { currency = 'inr', plan = 'starter' } = await req.json();
+    const supabaseAdmin = createClient(supabaseUrl, serviceRole);
 
+    // 3. Verify User
+    let user;
+    try {
+      const { data, error: authError } = await supabaseAdmin.auth.getUser(token);
+      if (authError || !data?.user) {
+        console.error('Auth Error:', authError?.message || 'No user data');
+        return new Response(JSON.stringify({ 
+          error: 'Unauthorized', 
+          details: authError?.message || 'Invalid session'
+        }), { status: 401, headers: corsHeaders });
+      }
+      user = data.user;
+    } catch (e) {
+      console.error('CRASH in auth.getUser:', e.message);
+      throw new Error(`User verification crashed: ${e.message}`);
+    }
+
+    console.log('Verification Success! User:', user.email);
+
+    // 4. Parse Request
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400, headers: corsHeaders });
+    }
+
+    const { currency = 'inr', plan = 'starter' } = body;
     const priceInfo = PRICES[currency]?.[plan];
     if (!priceInfo) return new Response(JSON.stringify({ error: 'Invalid plan or currency' }), { status: 400, headers: corsHeaders });
+
+    // 5. Razorpay Interaction
+    if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+      console.error('ERROR: Missing Razorpay Keys');
+      return new Response(JSON.stringify({ 
+        error: 'System Configuration Error', 
+        details: 'Razorpay API keys are not set in Supabase Secrets.' 
+      }), { status: 500, headers: corsHeaders });
+    }
 
     const auth = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
     const orderRes = await fetch('https://api.razorpay.com/v1/orders', {
@@ -79,10 +105,18 @@ serve(async (req) => {
     });
 
     const order = await orderRes.json();
-    if (!orderRes.ok) throw new Error(order.error?.description || 'Razorpay error');
+    if (!orderRes.ok) {
+        console.error('Razorpay API Error:', order);
+        throw new Error(order.error?.description || 'Razorpay order creation failed');
+    }
+
     return new Response(JSON.stringify({ ...order, plan }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    console.error('GLOBAL FUNCTION ERROR:', err.message);
+    return new Response(JSON.stringify({ 
+        error: 'Edge Function Error', 
+        details: err.message 
+    }), { status: 500, headers: corsHeaders });
   }
 });

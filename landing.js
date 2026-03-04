@@ -2,9 +2,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Navbar scroll effect ---
   const navbar = document.getElementById('navbar');
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+
   window.addEventListener('scroll', () => {
     navbar.classList.toggle('scrolled', window.scrollY > 50);
   });
+
+  // --- Mobile Menu Toggle ---
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', () => {
+      navbar.classList.toggle('nav-active');
+      mobileMenuBtn.textContent = navbar.classList.contains('nav-active') ? '✕' : '☰';
+    });
+  }
 
   // --- Scroll reveal ---
   const revealTargets = document.querySelectorAll(
@@ -27,6 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = document.querySelector(a.getAttribute('href'));
       if (target) {
         e.preventDefault();
+        // Close mobile menu on click
+        navbar.classList.remove('nav-active');
+        if (mobileMenuBtn) mobileMenuBtn.textContent = '☰';
+        
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });

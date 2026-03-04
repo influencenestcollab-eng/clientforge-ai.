@@ -11,7 +11,8 @@ const RAZORPAY_WEBHOOK_SECRET = Deno.env.get('RAZORPAY_WEBHOOK_SECRET') || RAZOR
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-razorpay-signature',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-razorpay-signature, x-supabase-auth',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 };
 
 serve(async (req) => {
@@ -26,14 +27,12 @@ serve(async (req) => {
     const rzpSignature = req.headers.get('x-razorpay-signature');
     const authHeader = req.headers.get('Authorization');
 
-    // ─── CASE 1: Client-Side Verification (Auth Header present) ───
-    if (authHeader && !rzpSignature) {
-      const supabaseUser = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-        { global: { headers: { Authorization: authHeader } } }
-      );
-      const { data: { user }, error } = await supabaseUser.auth.getUser();
+    // ─── CASE 1: Client-Side Verification ───
+    if (!rzpSignature) {
+      const token = req.headers.get('X-Supabase-Auth')?.trim();
+      if (!token) return new Response(JSON.stringify({ error: 'Missing token' }), { status: 401, headers: corsHeaders });
+
+      const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
       if (error || !user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
 
       const { razorpay_payment_id, razorpay_order_id, razorpay_signature, plan } = await req.json();

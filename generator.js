@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     .single();
 
   const isSubscribed = profile?.subscription_status === 'active' || profile?.subscription_status === 'pro';
-  const isPro = profile?.subscription_status === 'pro';
+  const isPro = profile?.subscription_plan === 'pro';
   const used = profile?.campaigns_used_this_month || 0;
 
   if (!isSubscribed) {
@@ -97,7 +97,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     try {
-      const result = await callGenerateAPI(formData, session.access_token);
+      const response = await callGenerateAPI(formData, session.access_token);
+      
+      if (!response.ok) {
+         const errData = await response.json().catch(() => ({}));
+         console.error('API Error Details:', errData);
+         alert(`❌ Generation Error: ${errData.details || errData.error || 'Check console'}`);
+         return;
+      }
+      
+      const result = await response.json();
       if (result.error) {
         if (result.code === 'LIMIT_REACHED') { showLimitReached(result.used); return; }
         throw new Error(result.error);
@@ -106,7 +115,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Update usage in UI
       if (result._meta) {
         const newUsed = result._meta.used;
-        badge.textContent = isPro ? 'PRO — Unlimited' : `STARTER — ${newUsed}/${STARTER_LIMIT} used`;
+        const subBadge = document.getElementById('subBadge');
+        if (subBadge) {
+          subBadge.textContent = isPro ? 'PRO — Unlimited' : `STARTER — ${newUsed}/${STARTER_LIMIT} used`;
+        }
         renderUsageBar(newUsed, isPro);
       }
 
@@ -129,11 +141,12 @@ async function callGenerateAPI(data, token) {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json', 
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'X-Supabase-Auth': token
     },
     body: JSON.stringify(data)
   });
-  return await res.json();
+  return res;
 }
 
 // ─── Render ───

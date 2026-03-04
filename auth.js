@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleText = document.getElementById('toggleText');
 
   // ─── Toggle between Login and Signup ───
-  toggleAuthMode.addEventListener('click', (e) => {
-    e.preventDefault();
+  function handleModeToggle(e) {
+    if (e) e.preventDefault();
     isLogin = !isLogin;
     
     if (isLogin) {
@@ -28,10 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
       authSubmitBtn.textContent = 'Create Account →';
       toggleText.innerHTML = `Already have an account? <a href="#" id="toggleAuthMode">Sign in</a>`;
     }
-    
-    // Re-attach event listener to the new link
-    document.getElementById('toggleAuthMode').addEventListener('click', arguments.callee);
-  });
+    // Re-attach listener since innerHTML replaced the element
+    document.getElementById('toggleAuthMode').addEventListener('click', handleModeToggle);
+  }
+
+  toggleAuthMode.addEventListener('click', handleModeToggle);
 
   // ─── Handle Form Submission ───
   authForm.addEventListener('submit', async (e) => {

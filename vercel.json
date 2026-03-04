@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "name": "clientforge-ai",
+  "cleanUrls": true,
+  "rewrites": [{ "source": "/(.*)", "destination": "/$1" }]
+}
